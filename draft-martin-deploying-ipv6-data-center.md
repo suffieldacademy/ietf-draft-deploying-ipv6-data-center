@@ -302,6 +302,20 @@ which commands run** until parity is proven.
 Temporarily **reducing IPv4 SSH session timeouts** on jump hosts can accelerate
 detection of accidental IPv4 dependency without blocking emergency access.
 
+Apply the same staged exposure to **corporate wireless**, not only SSH bastions.
+Provide **dual-stack Wi-Fi** for everyday employee devices during migration, and
+at least one **IPv6-only employee Wi-Fi** SSID so laptops, phones, VPN clients,
+and captive-portal flows are exercised on AAAA-only paths before production
+depends on them. Label SSIDs explicitly (for example, `corp-dualstack` and
+`corp-v6-only`) so engineers know which network they joined.
+
+Some operators **MAY** additionally offer **IPv6-only guest Wi-Fi** --- for
+example in lab, conference, or vendor demo areas --- so external teams can
+demonstrate that hardware and software work without IPv4 fallback during
+evaluations and acceptance testing. That network **SHOULD** be clearly marked,
+rate-limited, and isolated from internal management zones; it complements jump
+hosts but does not replace them for break-glass administration.
+
 # Observability and Metrics {#observability}
 
 IPv6 migration needs **inventory plus measurement**: a service list with IPv6
@@ -662,6 +676,17 @@ same hostname and IPAM data already used for IPv4. When the service later
 enables IPv6 and the AAAA is published, the pre-provisioned rules should match
 without a second ACL rollout. The site translation plan in step 5 **MUST** be
 documented and stable; ad hoc embedding layouts defeat this approach.
+
+The same correlation policy supports an **early dual-stack step on the host**
+without advertising **AAAA** in DNS. IPAM assigns the predicted IPv6 address on
+the interface; the application tier can remain **IPv4-only** (A record only,
+IPv4 listen sockets) while **outbound** traffic from the host uses IPv6. That
+lets platform agents --- configuration management, monitoring, log shippers,
+vulnerability scanners, and other infrastructure daemons (see (#host-agents))
+--- reach **IPv6-only** services on the fabric before application code is
+ready. Inbound clients still use IPv4 until a deliberate cutover adds AAAA and
+dual-stack or IPv6-only listeners; pre-provision ACLs and routing for the
+predicted v6 address using the steps above.
 
 If ACL systems cannot accept hostnames and expand them through this logic,
 teams fall back to the lag problem described above --- IPv6 goes live while

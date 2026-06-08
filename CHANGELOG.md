@@ -23,7 +23,8 @@ semantics.
   Eyeballs IPv4 delay; runtime-specific resolution (Java, non-glibc).
 - **Addressing (§8):** `fe80::1` gateway as good practice; prefix allocation
   (/72 in closed DCs, NAT tracing); internal prefix routing filter; semantic
-  prefix coloring in monitoring UIs.
+  prefix coloring in monitoring UIs; host IPv6 via IPAM correlation without
+  AAAA for outbound/agent dual-stack staging.
 - **Application readiness (§11):** Developer dual-stack/IPv6-only test
   environments; AI coding agent IPv6 skills in CI.
 - **Network diagnostics (§14):** Reverse DNS and controlled ICMP echo inside
@@ -33,6 +34,7 @@ semantics.
 - **Observability (§5):** Dual-stack regression monitoring; treat IPv6 failures
   as hard failures.
 - **Out-of-band (§7):** IPMI over IPv6 for remote reboot and provisioning.
-- **Transition (§4):** Cultural shift and jump hosts before emergencies.
+- **Transition (§4):** Cultural shift and jump hosts before emergencies; dual-stack
+  and IPv6-only employee Wi-Fi; optional IPv6-only guest Wi-Fi for vendor demos.
 - **Internal vs external scope (§8.5):** IPv6-only on internal interfaces;
   dual-stack external edges; dual-homed edge servers for administration.

@@ -1939,6 +1939,18 @@ hosts, forcing administrative tooling onto IPv6. Maintain at least one
 which commands run</strong> until parity is proven.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.2-3">Temporarily <strong>reducing IPv4 SSH session timeouts</strong> on jump hosts can accelerate
 detection of accidental IPv4 dependency without blocking emergency access.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">Apply the same staged exposure to <strong>corporate wireless</strong>, not only SSH bastions.
+Provide <strong>dual-stack Wi-Fi</strong> for everyday employee devices during migration, and
+at least one <strong>IPv6-only employee Wi-Fi</strong> SSID so laptops, phones, VPN clients,
+and captive-portal flows are exercised on AAAA-only paths before production
+depends on them. Label SSIDs explicitly (for example, <code>corp-dualstack</code> and
+<code>corp-v6-only</code>) so engineers know which network they joined.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2-5">Some operators <span class="bcp14">MAY</span> additionally offer <strong>IPv6-only guest Wi-Fi</strong> --- for
+example in lab, conference, or vendor demo areas --- so external teams can
+demonstrate that hardware and software work without IPv4 fallback during
+evaluations and acceptance testing. That network <span class="bcp14">SHOULD</span> be clearly marked,
+rate-limited, and isolated from internal management zones; it complements jump
+hosts but does not replace them for break-glass administration.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2408,9 +2420,19 @@ same hostname and IPAM data already used for IPv4. When the service later
 enables IPv6 and the AAAA is published, the pre-provisioned rules should match
 without a second ACL rollout. The site translation plan in step 5 <span class="bcp14">MUST</span> be
 documented and stable; ad hoc embedding layouts defeat this approach.<a href="#section-8.7.1-4" class="pilcrow">¶</a></p>
-<p id="section-8.7.1-5">If ACL systems cannot accept hostnames and expand them through this logic,
+<p id="section-8.7.1-5">The same correlation policy supports an <strong>early dual-stack step on the host</strong>
+without advertising <strong>AAAA</strong> in DNS. IPAM assigns the predicted IPv6 address on
+the interface; the application tier can remain <strong>IPv4-only</strong> (A record only,
+IPv4 listen sockets) while <strong>outbound</strong> traffic from the host uses IPv6. That
+lets platform agents --- configuration management, monitoring, log shippers,
+vulnerability scanners, and other infrastructure daemons (see <a href="#host-agents" class="auto internal xref">Section 5.5</a>)
+--- reach <strong>IPv6-only</strong> services on the fabric before application code is
+ready. Inbound clients still use IPv4 until a deliberate cutover adds AAAA and
+dual-stack or IPv6-only listeners; pre-provision ACLs and routing for the
+predicted v6 address using the steps above.<a href="#section-8.7.1-5" class="pilcrow">¶</a></p>
+<p id="section-8.7.1-6">If ACL systems cannot accept hostnames and expand them through this logic,
 teams fall back to the lag problem described above --- IPv6 goes live while
-firewall tickets are still in flight.<a href="#section-8.7.1-5" class="pilcrow">¶</a></p>
+firewall tickets are still in flight.<a href="#section-8.7.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
