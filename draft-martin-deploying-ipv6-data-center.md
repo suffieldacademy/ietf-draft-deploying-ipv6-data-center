@@ -11,7 +11,6 @@ date = 2026-06-05
 [seriesInfo]
 name = "Internet-Draft"
 value = "draft-martin-deploying-ipv6-data-center-00"
-stream = "IETF"
 status = "informational"
 
 [[author]]
@@ -28,7 +27,7 @@ organization = "Peachymango.org"
 Data center operators are moving toward IPv6-only operation to simplify
 addressing, restore end-to-end connectivity, and meet operator and
 government timelines. Much published IPv6 guidance targets network engineers;
-this document instead addresses **Software Release Engineers (SREs)** and
+this document instead addresses **Site Reliability Engineers (SREs)** and
 **Software Engineers (SWEs)** who deploy, operate, and debug services in
 data centers. It explains IPv6 fundamentals that affect application code,
 observability, DNS, load balancing, and out-of-band management; documents
@@ -41,7 +40,8 @@ patterns aligned with the IPv6 Operations (v6ops) working group charter.
 
 ## Audience and Purpose
 
-This document is written for **SREs and SWEs** who run services in data
+This document is written for **Site Reliability Engineers (SREs) and Software
+Engineers (SWEs)** who run services in data
 centers --- not primarily for network engineers designing routing policy.
 Network teams still own prefixes, routing, and firewalls, but IPv6
 deployment succeeds or fails in application code, configuration management,
@@ -412,10 +412,12 @@ flows, when NAT is involved. IPv6 routing reduces NAT use --- which also
 
 Enterprise data centers usually prefer **static addresses** from an IP Address
 Management (IPAM) system over SLAAC-derived random interface identifiers.
-Disable the **Managed** and **Other** flags in **Router Advertisements (RA)**
-on server-facing ports, or disable **SLAAC** on servers
-themselves when static addressing is required, so hosts do not acquire
-unexpected addresses alongside provisioned ones.
+Disable **Router Advertisements (RA)** on server-facing **switch ports** (for
+example by clearing the **Managed** and **Other** flags) **and** disable
+**SLAAC** on **servers and other endpoints** when static addressing is required.
+Applying both controls --- at the **network edge and on the host** --- provides
+**two layers of protection** so hosts do not acquire unexpected addresses
+alongside provisioned ones.
 
 Gateway at **`fe80::1`**, global addresses from IPAM, and DNS names registered
 in forward and reverse zones should be one coordinated change set.

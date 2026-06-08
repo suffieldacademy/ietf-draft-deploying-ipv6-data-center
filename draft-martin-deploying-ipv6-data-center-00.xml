@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- name="GENERATOR" content="github.com/mmarkdown/mmark Mmark Markdown Processor - mmark.miek.nl" -->
-<rfc version="3" ipr="trust200902" docName="draft-martin-deploying-ipv6-data-center-00" submissionType="IETF" category="info" xml:lang="en" xmlns:xi="http://www.w3.org/2001/XInclude" indexInclude="true">
+<rfc version="3" ipr="trust200902" docName="draft-martin-deploying-ipv6-data-center-00" category="info" xml:lang="en" xmlns:xi="http://www.w3.org/2001/XInclude" indexInclude="true">
 
 <front>
-<title abbrev="deploying-ipv6-data-center">Deploying IPv6 in Data Centers</title><seriesInfo value="draft-martin-deploying-ipv6-data-center-00" stream="IETF" status="informational" name="Internet-Draft"></seriesInfo>
+<title abbrev="deploying-ipv6-data-center">Deploying IPv6 in Data Centers</title><seriesInfo value="draft-martin-deploying-ipv6-data-center-00" status="informational" name="Internet-Draft"></seriesInfo>
 <author initials="F." surname="Martin" fullname="Franck Martin"><organization>Peachymango.org</organization><address><postal><street></street>
 </postal><email>franck@peachymango.org</email>
 </address></author><date year="2026" month="June" day="5"></date>
@@ -20,7 +20,7 @@
 <t>Data center operators are moving toward IPv6-only operation to simplify
 addressing, restore end-to-end connectivity, and meet operator and
 government timelines. Much published IPv6 guidance targets network engineers;
-this document instead addresses <strong>Software Release Engineers (SREs)</strong> and
+this document instead addresses <strong>Site Reliability Engineers (SREs)</strong> and
 <strong>Software Engineers (SWEs)</strong> who deploy, operate, and debug services in
 data centers. It explains IPv6 fundamentals that affect application code,
 observability, DNS, load balancing, and out-of-band management; documents
@@ -35,7 +35,8 @@ patterns aligned with the IPv6 Operations (v6ops) working group charter.</t>
 <section anchor="introduction"><name>Introduction</name>
 
 <section anchor="audience-and-purpose"><name>Audience and Purpose</name>
-<t>This document is written for <strong>SREs and SWEs</strong> who run services in data
+<t>This document is written for <strong>Site Reliability Engineers (SREs) and Software
+Engineers (SWEs)</strong> who run services in data
 centers --- not primarily for network engineers designing routing policy.
 Network teams still own prefixes, routing, and firewalls, but IPv6
 deployment succeeds or fails in application code, configuration management,
@@ -119,7 +120,8 @@ Discovery (ND)</strong> carried in <strong>ICMPv6</strong> <xref target="RFC4861
 addresses on the local link, discovers routers, and performs other essential
 functions. <strong>ICMPv6 therefore MUST NOT be blocked wholesale</strong> on IPv6 paths
 the way some IPv4 deployments block all ICMP. Blocking ICMPv6 breaks ND and
-PMTUD and produces failures that look like application bugs.</t>
+PMTUD and produces failures that look like application bugs.  Guidance exists
+to identify essential ICMPv6 traffic that should not be blocked <xref target="RFC4890"></xref>.</t>
 </section>
 
 <section anchor="end-to-end-connectivity"><name>End-to-End Connectivity</name>
@@ -146,17 +148,25 @@ in purpose but are uncommon in many data center designs that use provider-
 aggregated global unicast space internally. Like IPv4 private address space,
 ULAs can create <strong>renumbering work</strong> when companies merge or networks are
 combined --- a data center network is never final.</t>
-<t><strong>Internal global unicast address</strong>: A globally routable IPv6 address used
-<strong>inside</strong> the data center (for example, from the operator's GUA allocation).
-These addresses are reachable according to routing and security policy, not
-because they are &quot;private.&quot;</t>
-<t><strong>External global unicast address</strong>: A globally routable address presented to
-clients on the Internet, often via load balancers or anycast.</t>
+<t><strong>Global Unicast Address (GUA)</strong>: A globally routable IPv6 address assigned
+from an organization's allocation of IPv6 addresses.</t>
 <t>Unlike IPv4, there is <strong>no RFC 1918 equivalent that dominates data center
 design</strong>. With rare exceptions (link-local, ULA, and special-purpose ranges
 in <xref target="RFC6890"></xref>), <strong>IPv6 unicast addresses are designed to be globally
 unique and routable</strong>. Security boundaries are enforced by routing policy and
-firewall rules, not by assuming addresses are inherently non-routable.</t>
+firewall rules, not by assuming addresses are inherently non-routable.  We
+use two additional terms to distinguish addresses based on thes policies:</t>
+<t><strong>Internal global unicast address</strong>: A globally routable IPv6 address used
+<strong>inside</strong> the data center.  These addresses are reachable according to
+routing and security policy, not because they are &quot;private.&quot;</t>
+<t><strong>External global unicast address</strong>: A globally routable address presented to
+clients on the Internet, often via load balancers or anycast.</t>
+<t>Unlike IPv4, nodes typically have multiple IPv6 addresses assigned to each
+of their interfaces.  The link-local addresses are necessary to participate
+in Neighbor Discovery and so serve a vital purpose even though they are not
+globally routable.  Additionally, because so many IPv6 addresses are
+available, some machines may use multiple global addresses simultaneously
+for purposes such as privacy or temporary use.</t>
 </section>
 
 <section anchor="address-representation"><name>Address Representation</name>
@@ -211,8 +221,8 @@ expected interface.</t>
 </section>
 
 <section anchor="naming-services"><name>Naming Services</name>
-<t><tt>::1</tt> is home; <tt>127.0.0.1</tt> is home. <strong>Do not embed IP addresses in
-application code</strong> when a name will do. Use hostnames and service discovery;
+<t><tt>::1</tt> is <tt>localhost</tt>; <tt>127.0.0.1</tt> is <tt>localhost</tt>. <strong>Do not embed IP addresses
+in application code</strong> when a name will do. Use hostnames and service discovery;
 resolve names at connection time.</t>
 <t>DNS (or an equivalent naming and service registry) becomes <strong>essential</strong> in
 IPv6 because humans cannot memorize 128-bit addresses. Operational maturity
@@ -385,9 +395,12 @@ flows, when NAT is involved. IPv6 routing reduces NAT use --- which also
 <section anchor="static-addressing-router-advertisements-and-ipam"><name>Static Addressing, Router Advertisements, and IPAM</name>
 <t>Enterprise data centers usually prefer <strong>static addresses</strong> from an IP Address
 Management (IPAM) system over SLAAC-derived random interface identifiers.
-Disable <strong>Router Advertisements (RA)</strong> on server-facing ports and on servers
-themselves when static addressing is required, so hosts do not acquire
-unexpected addresses alongside provisioned ones.</t>
+Disable <strong>Router Advertisements (RA)</strong> on server-facing <strong>switch ports</strong> (for
+example by clearing the <strong>Managed</strong> and <strong>Other</strong> flags) <strong>and</strong> disable
+<strong>SLAAC</strong> on <strong>servers and other endpoints</strong> when static addressing is required.
+Applying both controls --- at the <strong>network edge and on the host</strong> --- provides
+<strong>two layers of protection</strong> so hosts do not acquire unexpected addresses
+alongside provisioned ones.</t>
 <t>Gateway at <strong><tt>fe80::1</tt></strong>, global addresses from IPAM, and DNS names registered
 in forward and reverse zones should be one coordinated change set.</t>
 </section>
@@ -1109,6 +1122,7 @@ risk from undeclared IPv4-only dependencies in the control plane.</t>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4443.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4704.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4861.xml"/>
+<xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4890.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5737.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5952.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6146.xml"/>

@@ -6,6 +6,12 @@ semantics.
 
 ## Unreleased
 
+- **Introduction (§1):** Correct SRE expansion to Site Reliability Engineers.
+- **Static addressing (§4.2):** Disable RA on switch ports and SLAAC on hosts
+  (two layers of protection).
+- **Build:** Drop `stream = "IETF"` for individual Datatracker submission; strip
+  default `submissionType="IETF"` in `fix-mmark-xml.py` (fixes idnits
+  SUBMISSION_TYPE_UNEXPECTED).
 - **Introduction (§1):** Remove v6ops charter paragraph; expand Related Guides
   with RFC 7381 and RFC 4038.
 - **Name resolution (§3):** Hostname connect retry across A/AAAA; Happy

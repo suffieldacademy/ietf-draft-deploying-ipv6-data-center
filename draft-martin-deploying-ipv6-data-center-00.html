@@ -10,7 +10,7 @@
        Data center operators are moving toward IPv6-only operation to simplify
 addressing, restore end-to-end connectivity, and meet operator and
 government timelines. Much published IPv6 guidance targets network engineers;
-this document instead addresses  Software Release Engineers (SREs)  and
+this document instead addresses  Site Reliability Engineers (SREs)  and
  Software Engineers (SWEs)  who deploy, operate, and debug services in
 data centers. It explains IPv6 fundamentals that affect application code,
 observability, DNS, load balancing, and out-of-band management; documents
@@ -1267,7 +1267,7 @@ li > p:last-of-type:only-child {
 <p id="section-abstract-1">Data center operators are moving toward IPv6-only operation to simplify
 addressing, restore end-to-end connectivity, and meet operator and
 government timelines. Much published IPv6 guidance targets network engineers;
-this document instead addresses <strong>Software Release Engineers (SREs)</strong> and
+this document instead addresses <strong>Site Reliability Engineers (SREs)</strong> and
 <strong>Software Engineers (SWEs)</strong> who deploy, operate, and debug services in
 data centers. It explains IPv6 fundamentals that affect application code,
 observability, DNS, load balancing, and out-of-band management; documents
@@ -1587,7 +1587,8 @@ patterns aligned with the IPv6 Operations (v6ops) working group charter.<a href=
         <h3 id="name-audience-and-purpose">
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-audience-and-purpose" class="section-name selfRef">Audience and Purpose</a>
         </h3>
-<p id="section-1.1-1">This document is written for <strong>SREs and SWEs</strong> who run services in data
+<p id="section-1.1-1">This document is written for <strong>Site Reliability Engineers (SREs) and Software
+Engineers (SWEs)</strong> who run services in data
 centers --- not primarily for network engineers designing routing policy.
 Network teams still own prefixes, routing, and firewalls, but IPv6
 deployment succeeds or fails in application code, configuration management,
@@ -1706,7 +1707,8 @@ Discovery (ND)</strong> carried in <strong>ICMPv6</strong> <span>[<a href="#RFC4
 addresses on the local link, discovers routers, and performs other essential
 functions. <strong>ICMPv6 therefore MUST NOT be blocked wholesale</strong> on IPv6 paths
 the way some IPv4 deployments block all ICMP. Blocking ICMPv6 breaks ND and
-PMTUD and produces failures that look like application bugs.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+PMTUD and produces failures that look like application bugs.  Guidance exists
+to identify essential ICMPv6 traffic that should not be blocked <span>[<a href="#RFC4890" class="cite xref">RFC4890</a>]</span>.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="end-to-end-connectivity">
@@ -1741,17 +1743,25 @@ in purpose but are uncommon in many data center designs that use provider-
 aggregated global unicast space internally. Like IPv4 private address space,
 ULAs can create <strong>renumbering work</strong> when companies merge or networks are
 combined --- a data center network is never final.<a href="#section-2.5-3" class="pilcrow">¶</a></p>
-<p id="section-2.5-4"><strong>Internal global unicast address</strong>: A globally routable IPv6 address used
-<strong>inside</strong> the data center (for example, from the operator's GUA allocation).
-These addresses are reachable according to routing and security policy, not
-because they are "private."<a href="#section-2.5-4" class="pilcrow">¶</a></p>
-<p id="section-2.5-5"><strong>External global unicast address</strong>: A globally routable address presented to
-clients on the Internet, often via load balancers or anycast.<a href="#section-2.5-5" class="pilcrow">¶</a></p>
-<p id="section-2.5-6">Unlike IPv4, there is <strong>no RFC 1918 equivalent that dominates data center
+<p id="section-2.5-4"><strong>Global Unicast Address (GUA)</strong>: A globally routable IPv6 address assigned
+from an organization's allocation of IPv6 addresses.<a href="#section-2.5-4" class="pilcrow">¶</a></p>
+<p id="section-2.5-5">Unlike IPv4, there is <strong>no RFC 1918 equivalent that dominates data center
 design</strong>. With rare exceptions (link-local, ULA, and special-purpose ranges
 in <span>[<a href="#RFC6890" class="cite xref">RFC6890</a>]</span>), <strong>IPv6 unicast addresses are designed to be globally
 unique and routable</strong>. Security boundaries are enforced by routing policy and
-firewall rules, not by assuming addresses are inherently non-routable.<a href="#section-2.5-6" class="pilcrow">¶</a></p>
+firewall rules, not by assuming addresses are inherently non-routable.  We
+use two additional terms to distinguish addresses based on thes policies:<a href="#section-2.5-5" class="pilcrow">¶</a></p>
+<p id="section-2.5-6"><strong>Internal global unicast address</strong>: A globally routable IPv6 address used
+<strong>inside</strong> the data center.  These addresses are reachable according to
+routing and security policy, not because they are "private."<a href="#section-2.5-6" class="pilcrow">¶</a></p>
+<p id="section-2.5-7"><strong>External global unicast address</strong>: A globally routable address presented to
+clients on the Internet, often via load balancers or anycast.<a href="#section-2.5-7" class="pilcrow">¶</a></p>
+<p id="section-2.5-8">Unlike IPv4, nodes typically have multiple IPv6 addresses assigned to each
+of their interfaces.  The link-local addresses are necessary to participate
+in Neighbor Discovery and so serve a vital purpose even though they are not
+globally routable.  Additionally, because so many IPv6 addresses are
+available, some machines may use multiple global addresses simultaneously
+for purposes such as privacy or temporary use.<a href="#section-2.5-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="address-representation">
@@ -1829,8 +1839,8 @@ expected interface.<a href="#section-2.8-1" class="pilcrow">¶</a></p>
         <h3 id="name-naming-services">
 <a href="#section-2.9" class="section-number selfRef">2.9. </a><a href="#name-naming-services" class="section-name selfRef">Naming Services</a>
         </h3>
-<p id="section-2.9-1"><code>::1</code> is home; <code>127.0.0.1</code> is home. <strong>Do not embed IP addresses in
-application code</strong> when a name will do. Use hostnames and service discovery;
+<p id="section-2.9-1"><code>::1</code> is <code>localhost</code>; <code>127.0.0.1</code> is <code>localhost</code>. <strong>Do not embed IP addresses
+in application code</strong> when a name will do. Use hostnames and service discovery;
 resolve names at connection time.<a href="#section-2.9-1" class="pilcrow">¶</a></p>
 <p id="section-2.9-2">DNS (or an equivalent naming and service registry) becomes <strong>essential</strong> in
 IPv6 because humans cannot memorize 128-bit addresses. Operational maturity
@@ -2052,9 +2062,12 @@ flows, when NAT is involved. IPv6 routing reduces NAT use --- which also
         </h3>
 <p id="section-4.2-1">Enterprise data centers usually prefer <strong>static addresses</strong> from an IP Address
 Management (IPAM) system over SLAAC-derived random interface identifiers.
-Disable <strong>Router Advertisements (RA)</strong> on server-facing ports and on servers
-themselves when static addressing is required, so hosts do not acquire
-unexpected addresses alongside provisioned ones.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+Disable <strong>Router Advertisements (RA)</strong> on server-facing <strong>switch ports</strong> (for
+example by clearing the <strong>Managed</strong> and <strong>Other</strong> flags) <strong>and</strong> disable
+<strong>SLAAC</strong> on <strong>servers and other endpoints</strong> when static addressing is required.
+Applying both controls --- at the <strong>network edge and on the host</strong> --- provides
+<strong>two layers of protection</strong> so hosts do not acquire unexpected addresses
+alongside provisioned ones.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.2-2">Gateway at <strong><code>fe80::1</code></strong>, global addresses from IPAM, and DNS names registered
 in forward and reverse zones should be one coordinated change set.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 </section>
@@ -3054,6 +3067,10 @@ risk from undeclared IPv4-only dependencies in the control plane.<a href="#secti
 <dt id="RFC4861">[RFC4861]</dt>
       <dd>
 <span class="refAuthor">Narten, T.</span>, <span class="refAuthor">Nordmark, E.</span>, <span class="refAuthor">Simpson, W.</span>, and <span class="refAuthor">H. Soliman</span>, <span class="refTitle">"Neighbor Discovery for IP version 6 (IPv6)"</span>, <span class="seriesInfo">RFC 4861</span>, <span class="seriesInfo">DOI 10.17487/RFC4861</span>, <time datetime="2007-09" class="refDate">September 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4861">https://www.rfc-editor.org/info/rfc4861</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4890">[RFC4890]</dt>
+      <dd>
+<span class="refAuthor">Davies, E.</span> and <span class="refAuthor">J. Mohacsi</span>, <span class="refTitle">"Recommendations for Filtering ICMPv6 Messages in Firewalls"</span>, <span class="seriesInfo">RFC 4890</span>, <span class="seriesInfo">DOI 10.17487/RFC4890</span>, <time datetime="2007-05" class="refDate">May 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4890">https://www.rfc-editor.org/info/rfc4890</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC5737">[RFC5737]</dt>
       <dd>

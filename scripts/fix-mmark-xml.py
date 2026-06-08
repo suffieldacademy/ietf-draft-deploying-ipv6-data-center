@@ -13,6 +13,18 @@ import sys
 from pathlib import Path
 
 
+def fix_submission_type(text: str) -> str:
+    """Drop submissionType on individual I-Ds without a declared stream.
+
+    mmark defaults submissionType to IETF, but Datatracker records -00
+    submissions with no stream until a working group adopts the draft.
+    idnits flags submissionType="IETF" against that state (SUBMISSION_TYPE_UNEXPECTED).
+    """
+    if re.search(r'<seriesInfo[^>]*\bstream="IETF"', text):
+        return text
+    return re.sub(r' submissionType="IETF"', "", text, count=1)
+
+
 def fix_references_wrapper(text: str) -> str:
     open_tag = "<references><name>References</name>\n"
     if open_tag not in text:
@@ -43,7 +55,10 @@ def main() -> None:
     if len(sys.argv) != 2:
         raise SystemExit(f"usage: {sys.argv[0]} <draft.xml>")
     path = Path(sys.argv[1])
-    path.write_text(fix_references_wrapper(path.read_text(encoding="utf-8")), encoding="utf-8")
+    text = path.read_text(encoding="utf-8")
+    text = fix_references_wrapper(text)
+    text = fix_submission_type(text)
+    path.write_text(text, encoding="utf-8")
 
 
 if __name__ == "__main__":
