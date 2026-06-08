@@ -232,8 +232,8 @@ expected interface.
 
 ## Naming Services {#naming-services}
 
-`::1` is home; `127.0.0.1` is home. **Do not embed IP addresses in
-application code** when a name will do. Use hostnames and service discovery;
+`::1` is `localhost`; `127.0.0.1` is `localhost`. **Do not embed IP addresses
+in application code** when a name will do. Use hostnames and service discovery;
 resolve names at connection time.
 
 DNS (or an equivalent naming and service registry) becomes **essential** in
