@@ -125,7 +125,8 @@ Discovery (ND)** carried in **ICMPv6** [@!RFC4861] [@!RFC4443]. ND resolves
 addresses on the local link, discovers routers, and performs other essential
 functions. **ICMPv6 therefore MUST NOT be blocked wholesale** on IPv6 paths
 the way some IPv4 deployments block all ICMP. Blocking ICMPv6 breaks ND and
-PMTUD and produces failures that look like application bugs.
+PMTUD and produces failures that look like application bugs.  Guidance exists
+to identify essential ICMPv6 traffic that should not be blocked [@!RFC4890].
 
 ## End-to-End Connectivity
 
