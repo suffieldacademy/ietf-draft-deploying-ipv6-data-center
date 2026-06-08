@@ -125,7 +125,8 @@ Discovery (ND)** carried in **ICMPv6** [@!RFC4861] [@!RFC4443]. ND resolves
 addresses on the local link, discovers routers, and performs other essential
 functions. **ICMPv6 therefore MUST NOT be blocked wholesale** on IPv6 paths
 the way some IPv4 deployments block all ICMP. Blocking ICMPv6 breaks ND and
-PMTUD and produces failures that look like application bugs.
+PMTUD and produces failures that look like application bugs.  Guidance exists
+to identify essential ICMPv6 traffic that should not be blocked [@!RFC4890].
 
 ## End-to-End Connectivity
 
@@ -155,19 +156,29 @@ aggregated global unicast space internally. Like IPv4 private address space,
 ULAs can create **renumbering work** when companies merge or networks are
 combined --- a data center network is never final.
 
-**Internal global unicast address**: A globally routable IPv6 address used
-**inside** the data center (for example, from the operator's GUA allocation).
-These addresses are reachable according to routing and security policy, not
-because they are "private."
-
-**External global unicast address**: A globally routable address presented to
-clients on the Internet, often via load balancers or anycast.
+**Global Unicast Address (GUA)**: A globally routable IPv6 address assigned
+from an organization's allocation of IPv6 addresses.
 
 Unlike IPv4, there is **no RFC 1918 equivalent that dominates data center
 design**. With rare exceptions (link-local, ULA, and special-purpose ranges
 in [@!RFC6890]), **IPv6 unicast addresses are designed to be globally
 unique and routable**. Security boundaries are enforced by routing policy and
-firewall rules, not by assuming addresses are inherently non-routable.
+firewall rules, not by assuming addresses are inherently non-routable.  We
+use two additional terms to distinguish addresses based on thes policies:
+
+**Internal global unicast address**: A globally routable IPv6 address used
+**inside** the data center.  These addresses are reachable according to
+routing and security policy, not because they are "private."
+
+**External global unicast address**: A globally routable address presented to
+clients on the Internet, often via load balancers or anycast.
+
+Unlike IPv4, nodes typically have multiple IPv6 addresses assigned to each
+of their interfaces.  The link-local addresses are necessary to participate
+in Neighbor Discovery and so serve a vital purpose even though they are not
+globally routable.  Additionally, because so many IPv6 addresses are
+available, some machines may use multiple global addresses simultaneously
+for purposes such as privacy or temporary use.
 
 ## Address Representation {#address-representation}
 
@@ -221,8 +232,8 @@ expected interface.
 
 ## Naming Services {#naming-services}
 
-`::1` is home; `127.0.0.1` is home. **Do not embed IP addresses in
-application code** when a name will do. Use hostnames and service discovery;
+`::1` is `localhost`; `127.0.0.1` is `localhost`. **Do not embed IP addresses
+in application code** when a name will do. Use hostnames and service discovery;
 resolve names at connection time.
 
 DNS (or an equivalent naming and service registry) becomes **essential** in
@@ -401,7 +412,8 @@ flows, when NAT is involved. IPv6 routing reduces NAT use --- which also
 
 Enterprise data centers usually prefer **static addresses** from an IP Address
 Management (IPAM) system over SLAAC-derived random interface identifiers.
-Disable **Router Advertisements (RA)** on server-facing ports and on servers
+Disable the **Managed** and **Other** flags in **Router Advertisements (RA)**
+on server-facing ports, or disable **SLAAC** on servers
 themselves when static addressing is required, so hosts do not acquire
 unexpected addresses alongside provisioned ones.
 
