@@ -783,6 +783,28 @@ accepting "no IPv6 security issues" claims.
 This document does not attempt a canonical vendor matrix --- products change
 --- but the inventory practice is mandatory for sane rollout planning.
 
+## Dependency and Platform Readiness Gates
+
+Many SREs and software engineers **will not** study address representation,
+`getaddrinfo()` semantics, or Happy Eyeballs in depth --- and should not have
+to before every deploy. Platform teams **SHOULD** publish **monitored readiness
+gates**: for each shared dependency (language runtime, HTTP/RPC client, database
+driver, messaging library, observability agent, base container image), document
+a **minimum version or image tag** validated on dual-stack and IPv6-only paths.
+Example gate: *upgrade **`example-http-client` to 2.4.0 or newer** --- then the
+service is cleared for IPv6*; versions below the threshold remain **blocked or
+flagged** in the inventory until upgraded.
+
+**Automate enforcement** against that catalog: compare SBOMs, lockfiles, image
+scans, and configuration-management reports to the matrix on a schedule and in
+CI (see (#observability)). When a service crosses the threshold --- dependency
+bumped, agent replaced, golden image refreshed --- **update its readiness label**
+without requiring every engineer to audit socket call sites by hand. Put the gates
+where teams already work (service catalog, Renovate or equivalent dependency
+bots, deployment checklists) and **SHOULD** tie change-advisory or promotion
+policy to them so **unknown** or **below-minimum** software cannot reach
+production dual-stack or IPv6-only paths unnoticed.
+
 ## Developer and Pre-Production Environments {#dev-environments}
 
 **Provide dual-stack (and eventually IPv6-only) networks to developers as early

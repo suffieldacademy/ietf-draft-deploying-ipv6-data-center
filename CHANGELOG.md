@@ -26,7 +26,8 @@ semantics.
   prefix coloring in monitoring UIs; host IPv6 via IPAM correlation without
   AAAA for outbound/agent dual-stack staging.
 - **Application readiness (§11):** Developer dual-stack/IPv6-only test
-  environments; AI coding agent IPv6 skills in CI.
+  environments; AI coding agent IPv6 skills in CI; dependency readiness gates
+  (minimum library/image versions monitored in CI and inventory).
 - **Network diagnostics (§14):** Reverse DNS and controlled ICMP echo inside
   the fabric.
 - **ICMPv6 (§10):** World IPv6 Day/Launch PMTUD anecdote replaces LinkedIn

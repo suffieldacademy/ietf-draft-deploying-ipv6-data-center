@@ -754,6 +754,27 @@ accepting &quot;no IPv6 security issues&quot; claims.</t>
 --- but the inventory practice is mandatory for sane rollout planning.</t>
 </section>
 
+<section anchor="dependency-and-platform-readiness-gates"><name>Dependency and Platform Readiness Gates</name>
+<t>Many SREs and software engineers <strong>will not</strong> study address representation,
+<tt>getaddrinfo()</tt> semantics, or Happy Eyeballs in depth --- and should not have
+to before every deploy. Platform teams <bcp14>SHOULD</bcp14> publish <strong>monitored readiness
+gates</strong>: for each shared dependency (language runtime, HTTP/RPC client, database
+driver, messaging library, observability agent, base container image), document
+a <strong>minimum version or image tag</strong> validated on dual-stack and IPv6-only paths.
+Example gate: <em>upgrade <strong><tt>example-http-client</tt> to 2.4.0 or newer</strong> --- then the
+service is cleared for IPv6</em>; versions below the threshold remain <strong>blocked or
+flagged</strong> in the inventory until upgraded.</t>
+<t><strong>Automate enforcement</strong> against that catalog: compare SBOMs, lockfiles, image
+scans, and configuration-management reports to the matrix on a schedule and in
+CI (see <xref target="observability"></xref>). When a service crosses the threshold --- dependency
+bumped, agent replaced, golden image refreshed --- <strong>update its readiness label</strong>
+without requiring every engineer to audit socket call sites by hand. Put the gates
+where teams already work (service catalog, Renovate or equivalent dependency
+bots, deployment checklists) and <bcp14>SHOULD</bcp14> tie change-advisory or promotion
+policy to them so <strong>unknown</strong> or <strong>below-minimum</strong> software cannot reach
+production dual-stack or IPv6-only paths unnoticed.</t>
+</section>
+
 <section anchor="dev-environments"><name>Developer and Pre-Production Environments</name>
 <t><strong>Provide dual-stack (and eventually IPv6-only) networks to developers as early
 as possible</strong> --- ideally before production rollout, not after. Engineers who
